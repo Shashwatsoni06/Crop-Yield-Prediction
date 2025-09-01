@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infographic: The Science of Predicting Crop Yield</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Energetic & Playful -->
+    <!-- Application Structure Plan: The infographic follows a narrative structure to tell a story about the project. It starts with a high-level hook ("The Challenge"), introduces the core components ("The Data"), explains the methodology ("The Workflow"), presents key findings through visualizations ("The Insights"), showcases the model's output ("The Prediction"), and finally, looks ahead ("The Future"). This logical progression is more engaging than a simple report and guides the user through the project's lifecycle, making complex information digestible and memorable. -->
+    <!-- Visualization & Content Choices: Data Point: Project workflow -> Goal: Organize -> Chosen Visualization: HTML/CSS Flowchart -> Justification: Clearly visualizes the sequential steps of the ML pipeline. Method: HTML/CSS with Tailwind. (CONFIRM: NO SVG/Mermaid) | Data Point: Yield of top crops over time -> Goal: Change -> Chosen Visualization: Line Chart -> Justification: Best for showing continuous trends over time. Library: Chart.js. (CONFIRM: NO SVG) | Data Point: Comparing average yield by country -> Goal: Compare/Rank -> Chosen Visualization: Horizontal Bar Chart -> Justification: Effectively compares and ranks discrete categories. Library: Chart.js. (CONFIRM: NO SVG) | Data Point: Model's specific output -> Goal: Inform -> Chosen Visualization: Single Big Number -> Justification: Creates a high-impact focal point for the key result. Method: HTML/CSS. (CONFIRM: NO SVG) -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .flow-step {
+            position: relative;
+            padding-left: 3rem;
+        }
+        .flow-step:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 2.5rem;
+            width: 2px;
+            height: calc(100% - 1rem);
+            background-color: #EB6841;
+            opacity: 0.5;
+        }
+        .flow-dot {
+            position: absolute;
+            left: 10px;
+            top: 1.25rem;
+            width: 22px;
+            height: 22px;
+        }
+    </style>
+</head>
+<body class="text-gray-700">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-[#6A4A3C] mb-2">The Science of Predicting Crop Yield</h1>
+            <p class="text-lg md:text-xl text-[#CC333F]">Using Machine Learning to Forecast the World's Harvest</p>
+        </header>
+
+        <section class="mb-12 bg-white rounded-lg shadow-md p-6 md:p-8">
+            <h2 class="text-3xl font-bold text-center text-[#00A0B0] mb-6">🌾 The Challenge: Feeding the Future</h2>
+            <p class="text-center max-w-3xl mx-auto">Accurately predicting crop yield is crucial for global food security and economic stability. This project leverages historical data and machine learning to build a model that forecasts agricultural output, offering valuable insights for farmers, governments, and markets.</p>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold text-center text-[#00A0B0] mb-8">📊 The Data: Key Ingredients for Prediction</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <p class="text-4xl mb-2">🌍</p>
+                    <h3 class="font-bold text-lg text-[#6A4A3C]">Area & Item</h3>
+                    <p class="text-sm">The country and specific crop type (e.g., Maize, Wheat) being analyzed.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <p class="text-4xl mb-2">🌡️</p>
+                    <h3 class="font-bold text-lg text-[#6A4A3C]">Climate Factors</h3>
+                    <p class="text-sm">Average annual temperature and rainfall, critical drivers of plant growth.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <p class="text-4xl mb-2">🧪</p>
+                    <h3 class="font-bold text-lg text-[#6A4A3C]">Human Factors</h3>
+                    <p class="text-sm">The year of harvest and the total amount of pesticides used in tonnes.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12 bg-white rounded-lg shadow-md p-6 md:p-8">
+            <h2 class="text-3xl font-bold text-center text-[#00A0B0] mb-8">🔧 The Workflow: From Data to Discovery</h2>
+            <div class="max-w-md mx-auto">
+                <div class="flow-step">
+                    <div class="flow-dot bg-[#EB6841] rounded-full border-4 border-white"></div>
+                    <h3 class="text-xl font-bold text-[#6A4A3C] mb-1 pt-4">Data Loading & Exploration</h3>
+                    <p class="text-sm pb-6">The dataset is loaded, and its structure is assessed to understand the available features.</p>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-dot bg-[#EB6841] rounded-full border-4 border-white"></div>
+                    <h3 class="text-xl font-bold text-[#6A4A3C] mb-1 pt-4">Data Preprocessing</h3>
+                    <p class="text-sm pb-6">Categorical features like country and crop type are encoded into numerical formats for the model.</p>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-dot bg-[#EB6841] rounded-full border-4 border-white"></div>
+                    <h3 class="text-xl font-bold text-[#6A4A3C] mb-1 pt-4">Exploratory Data Analysis (EDA)</h3>
+                    <p class="text-sm pb-6">Visualizations are used to uncover trends, patterns, and correlations within the data.</p>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-dot bg-[#EB6841] rounded-full border-4 border-white"></div>
+                    <h3 class="text-xl font-bold text-[#6A4A3C] mb-1 pt-4">Model Training</h3>
+                    <p class="text-sm pb-6">A Random Forest Regressor is trained on 80% of the data to learn the patterns connecting the features to crop yield.</p>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-dot bg-[#EB6841] rounded-full border-4 border-white"></div>
+                    <h3 class="text-xl font-bold text-[#6A4A3C] mb-1 pt-4">Prediction & Evaluation</h3>
+                    <p class="text-sm pb-6">The trained model is used to make predictions on the remaining 20% of the data to evaluate its accuracy.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold text-center text-[#00A0B0] mb-8">📈 The Insights: Visualizing Global Trends</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold text-center text-[#6A4A3C] mb-1">Top 5 Highest Yielding Countries</h3>
+                    <p class="text-sm text-center text-gray-500 mb-4">(Average Yield in hg/ha across all crops)</p>
+                    <div class="chart-container"><canvas id="countryYieldChart"></canvas></div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold text-center text-[#6A4A3C] mb-1">Yield of Major Crops Over Time</h3>
+                     <p class="text-sm text-center text-gray-500 mb-4">(Worldwide Average Yield in hg/ha)</p>
+                    <div class="chart-container"><canvas id="yieldTrendChart"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12 bg-white rounded-lg shadow-md p-6 md:p-8">
+            <h2 class="text-3xl font-bold text-center text-[#00A0B0] mb-8">🎯 The Prediction: Model in Action</h2>
+            <p class="text-center max-w-2xl mx-auto mb-6">The trained model can predict yield for a specific set of conditions. Here's an example prediction based on the data:</p>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-center max-w-3xl mx-auto mb-6">
+                <div class="bg-gray-100 p-3 rounded-md">
+                    <p class="text-sm font-bold text-[#6A4A3C]">Saudi Arabia</p>
+                    <p class="text-xs text-gray-500">Area</p>
+                </div>
+                <div class="bg-gray-100 p-3 rounded-md">
+                    <p class="text-sm font-bold text-[#6A4A3C]">Sorghum</p>
+                    <p class="text-xs text-gray-500">Crop</p>
+                </div>
+                <div class="bg-gray-100 p-3 rounded-md">
+                    <p class="text-sm font-bold text-[#6A4A3C]">2013</p>
+                    <p class="text-xs text-gray-500">Year</p>
+                </div>
+                <div class="bg-gray-100 p-3 rounded-md">
+                    <p class="text-sm font-bold text-[#6A4A3C]">59 mm</p>
+                    <p class="text-xs text-gray-500">Rainfall</p>
+                </div>
+                 <div class="bg-gray-100 p-3 rounded-md">
+                    <p class="text-sm font-bold text-[#6A4A3C]">3024 t</p>
+                    <p class="text-xs text-gray-500">Pesticides</p>
+                </div>
+                 <div class="bg-gray-100 p-3 rounded-md">
+                    <p class="text-sm font-bold text-[#6A4A3C]">26.55 °C</p>
+                    <p class="text-xs text-gray-500">Temperature</p>
+                </div>
+            </div>
+            <div class="text-center bg-gradient-to-r from-[#EB6841] to-[#CC333F] text-white p-6 rounded-lg max-w-sm mx-auto shadow-xl">
+                <p class="text-lg font-semibold">Predicted Yield:</p>
+                <p class="text-5xl font-extrabold tracking-tight">13,384</p>
+                <p class="font-medium">Hectograms per Hectare</p>
+            </div>
+        </section>
+
+        <section class="text-center">
+            <h2 class="text-3xl font-bold text-center text-[#00A0B0] mb-6">💡 The Future: Enhancing the Model</h2>
+            <div class="flex flex-wrap justify-center gap-4 text-sm">
+                <span class="bg-[#EDC951] text-[#6A4A3C] font-semibold px-4 py-2 rounded-full">Hyperparameter Tuning</span>
+                <span class="bg-[#EDC951] text-[#6A4A3C] font-semibold px-4 py-2 rounded-full">Try Different Models</span>
+                <span class="bg-[#EDC951] text-[#6A4A3C] font-semibold px-4 py-2 rounded-full">Expand the Dataset</span>
+                <span class="bg-[#EDC951] text-[#6A4A3C] font-semibold px-4 py-2 rounded-full">Deploy as Web App/API</span>
+            </div>
+        </section>
+
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const data = [
+        {"Area": "Albania", "Item": "Maize", "Year": 1990, "hg/ha_yield": 36613, "avg_temp": 16.37},
+        {"Area": "Albania", "Item": "Potatoes", "Year": 1990, "hg/ha_yield": 66667, "avg_temp": 16.37},
+        {"Area": "Albania", "Item": "Wheat", "Year": 1990, "hg/ha_yield": 30197, "avg_temp": 16.37},
+        {"Area": "India", "Item": "Maize", "Year": 2002, "hg/ha_yield": 19562, "avg_temp": 26.93},
+        {"Area": "India", "Item": "Potatoes", "Year": 2002, "hg/ha_yield": 174220, "avg_temp": 26.93},
+        {"Area": "India", "Item": "Wheat", "Year": 2002, "hg/ha_yield": 26978, "avg_temp": 26.93},
+        {"Area": "Brazil", "Item": "Maize", "Year": 2013, "hg/ha_yield": 46380, "avg_temp": 25.4},
+        {"Area": "Brazil", "Item": "Potatoes", "Year": 2013, "hg/ha_yield": 242787, "avg_temp": 25.4},
+        {"Area": "Brazil", "Item": "Wheat", "Year": 2013, "hg/ha_yield": 24548, "avg_temp": 25.4},
+        {"Area": "Germany", "Item": "Maize", "Year": 2013, "hg/ha_yield": 83200, "avg_temp": 9.2},
+        {"Area": "Germany", "Item": "Potatoes", "Year": 2013, "hg/ha_yield": 443429, "avg_temp": 9.2},
+        {"Area": "Germany", "Item": "Wheat", "Year": 2013, "hg/ha_yield": 79300, "avg_temp": 9.2},
+        {"Area": "United Kingdom", "Item": "Maize", "Year": 2013, "hg/ha_yield": 69444, "avg_temp": 9.0},
+        {"Area": "United Kingdom", "Item": "Potatoes", "Year": 2013, "hg/ha_yield": 432001, "avg_temp": 9.0},
+        {"Area": "United Kingdom", "Item": "Wheat", "Year": 2013, "hg/ha_yield": 77626, "avg_temp": 9.0},
+        {"Area": "Japan", "Item": "Maize", "Year": 2013, "hg/ha_yield": 47250, "avg_temp": 15.3},
+        {"Area": "Japan", "Item": "Potatoes", "Year": 2013, "hg/ha_yield": 223200, "avg_temp": 15.3},
+        {"Area": "Japan", "Item": "Wheat", "Year": 2013, "hg/ha_yield": 49091, "avg_temp": 15.3}
+    ];
+
+    const tooltipCallback = {
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    title: function(tooltipItems) {
+                        const item = tooltipItems[0];
+                        let label = item.chart.data.labels[item.dataIndex];
+                        if (Array.isArray(label)) {
+                            return label.join(' ');
+                        } else {
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    };
+    
+    function processLongLabels(labels, maxLength = 16) {
+        return labels.map(label => {
+            if (label.length <= maxLength) return label;
+            const words = label.split(' ');
+            let lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + word).length > maxLength) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            }
+            lines.push(currentLine.trim());
+            return lines.filter(line => line);
+        });
+    }
+
+    const countryYields = data.reduce((acc, curr) => {
+        if (!acc[curr.Area]) {
+            acc[curr.Area] = { total: 0, count: 0 };
+        }
+        acc[curr.Area].total += curr['hg/ha_yield'];
+        acc[curr.Area].count++;
+        return acc;
+    }, {});
+
+    const avgCountryYields = Object.keys(countryYields).map(country => ({
+        country: country,
+        avgYield: countryYields[country].total / countryYields[country].count
+    })).sort((a, b) => b.avgYield - a.avgYield).slice(0, 5);
+
+    const countryYieldCtx = document.getElementById('countryYieldChart').getContext('2d');
+    new Chart(countryYieldCtx, {
+        type: 'bar',
+        data: {
+            labels: processLongLabels(avgCountryYields.map(d => d.country)),
+            datasets: [{
+                label: 'Average Yield (hg/ha)',
+                data: avgCountryYields.map(d => d.avgYield),
+                backgroundColor: ['#00A0B0', '#6A4A3C', '#CC333F', '#EB6841', '#EDC951'],
+                borderColor: '#ffffff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            ...tooltipCallback,
+            plugins: { ...tooltipCallback.plugins, legend: { display: false } },
+            scales: { x: { grid: { display: false } }, y: { grid: { display: false } } }
+        }
+    });
+
+    const years = [...new Set(data.map(d => d.Year))].sort();
+    const items = ['Maize', 'Potatoes', 'Wheat'];
+    const trendData = {
+        labels: years,
+        datasets: items.map((item, i) => {
+            return {
+                label: item,
+                data: years.map(year => {
+                    const yearData = data.filter(d => d.Year === year && d.Item === item);
+                    const avg = yearData.reduce((sum, d) => sum + d['hg/ha_yield'], 0) / yearData.length;
+                    return avg || null;
+                }),
+                borderColor: ['#00A0B0', '#CC333F', '#EDC951'][i],
+                backgroundColor: ['#00A0B0', '#CC333F', '#EDC951'][i] + '1A',
+                fill: false,
+                tension: 0.3
+            };
+        })
+    };
+
+    const yieldTrendCtx = document.getElementById('yieldTrendChart').getContext('2d');
+    new Chart(yieldTrendCtx, {
+        type: 'line',
+        data: trendData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            ...tooltipCallback,
+            scales: {
+                y: { beginAtZero: false, grid: { color: '#e0e0e0' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+});
+</script>
+
+</body>
+</html>
+

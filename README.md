@@ -1,4 +1,12 @@
 
+<img width="2834" height="1282" alt="Screenshot 2025-09-02 022253" src="https://github.com/user-attachments/assets/d6c63f7e-5d17-4e94-85e4-0cec74ae9635" />
+<img width="2821" height="1531" alt="Screenshot 2025-09-02 022315" src="https://github.com/user-attachments/assets/b22f5e4b-eebe-46ea-b46d-af2458a7da0e" />
+<img width="2836" height="1514" alt="Screenshot 2025-09-02 022329" src="https://github.com/user-attachments/assets/5e6c414a-dfc4-4431-9eb1-094f52680ae0" />
+<img width="2844" height="1490" alt="Screenshot 2025-09-02 022345" src="https://github.com/user-attachments/assets/2a1aa54e-3048-4611-86b2-77ee01cc9242" />
+
+
+
+
 Machine Learning Crop Yield Prediction
 📖 Overview
 This project presents a machine learning approach to predict agricultural crop yield. Using a dataset that combines crop production information with environmental factors like average rainfall and temperature, we've built a model to forecast yield in 'hectograms per hectare' (hg/ha).

@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Yield Prediction Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The SPA is structured into three thematic sections: Overview, Interactive Explorer, and Yield Predictor. This top-down flow guides the user from a high-level understanding of the project's purpose to a hands-on exploration of the underlying data, and finally to a practical demonstration of the model's predictive capability. This is more intuitive than a linear report, allowing users to engage at their preferred level of detail and providing a clear narrative from problem to solution. Key interactions include filtering data by country, crop, and year, which dynamically updates all visualizations, and a form-based predictor to simulate model outputs. -->
+    <!-- Visualization & Content Choices: Report Info: Historical crop yield data. -> Goal: Show trends over time. -> Viz: Line Chart (Chart.js). -> Interaction: Filters update data. -> Justification: Clearly illustrates performance changes for specific crops/countries. | Report Info: Yield vs environmental factors. -> Goal: Explore relationships. -> Viz: Scatter Plot (Chart.js). -> Interaction: Filters + selectable factor. -> Justification: Helps identify key drivers of yield. | Report Info: Prediction model. -> Goal: Demonstrate model utility. -> Viz: Interactive Form/Text Output. -> Interaction: User inputs data. -> Justification: Provides a tangible, hands-on experience of the project's outcome. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+        }
+        .nav-button.active {
+            background-color: #8C6A5D;
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F1E9E5;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #BFAE99;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8C6A5D;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #8C6A5D;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="min-h-screen">
+        <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-10">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <h1 class="text-2xl font-bold text-[#5a4740]">🌾 Crop Yield Prediction Dashboard</h1>
+                    <nav class="hidden md:flex space-x-2">
+                        <button data-target="overview" class="nav-button active px-3 py-2 text-sm font-medium text-gray-700 hover:bg-[#EAE1D9] rounded-md">Overview</button>
+                        <button data-target="explorer" class="nav-button px-3 py-2 text-sm font-medium text-gray-700 hover:bg-[#EAE1D9] rounded-md">Data Explorer</button>
+                        <button data-target="predictor" class="nav-button px-3 py-2 text-sm font-medium text-gray-700 hover:bg-[#EAE1D9] rounded-md">Predictor</button>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+            <section id="overview" class="section active animate-fade-in">
+                <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                    <h2 class="text-3xl font-bold text-[#5a4740] mb-4">Project Overview</h2>
+                    <p class="text-lg text-gray-600 mb-6">This project presents a machine learning approach to predict agricultural crop yield. Using a dataset that combines crop production information with environmental factors like average rainfall and temperature, we've built a Random Forest Regressor model to forecast yield in 'hectograms per hectare' (hg/ha). This dashboard provides an interactive way to explore the data and see the model's potential in action.</p>
+                    <div class="grid md:grid-cols-2 gap-6 text-gray-700">
+                        <div>
+                            <h3 class="text-xl font-semibold text-[#8C6A5D] mb-2">📊 The Dataset</h3>
+                            <p>The model is trained on a global dataset containing key features that influence crop growth. Understanding these factors is the first step to building an accurate predictive model.</p>
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li><strong>Area:</strong> Country of harvest</li>
+                                <li><strong>Item:</strong> Type of crop (e.g., Maize, Wheat)</li>
+                                <li><strong>Year:</strong> Harvest year</li>
+                                <li><strong>Rainfall:</strong> Avg. annual rainfall (mm)</li>
+                                <li><strong>Pesticides:</strong> Pesticides used (tonnes)</li>
+                                <li><strong>Temperature:</strong> Avg. annual temperature (°C)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-[#8C6A5D] mb-2">🔧 The Model</h3>
+                            <p>A Random Forest Regressor was chosen for its high accuracy and ability to handle complex, non-linear relationships between the features and the target variable, crop yield.</p>
+                             <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li><strong>Data Cleaning:</strong> Handled categorical data.</li>
+                                <li><strong>Feature Engineering:</strong> Encoded text data for the model.</li>
+                                <li><strong>Training:</strong> Split data into training and testing sets.</li>
+                                <li><strong>Evaluation:</strong> Assessed model performance to ensure reliability.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="explorer" class="section">
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg border border-gray-200">
+                    <h2 class="text-3xl font-bold text-[#5a4740] mb-6">Interactive Data Explorer</h2>
+                    <p class="text-lg text-gray-600 mb-6">Use the filters below to explore the dataset that trained the model. Select a country and crop to see how yield has changed over time and its relationship with environmental factors. This section helps you understand the underlying trends and patterns in global agriculture.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 p-4 bg-[#F8F5F1] rounded-lg">
+                        <div>
+                            <label for="country-select" class="block text-sm font-medium text-gray-700">Country</label>
+                            <select id="country-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#8C6A5D] focus:border-[#8C6A5D] sm:text-sm rounded-md"></select>
+                        </div>
+                        <div>
+                            <label for="crop-select" class="block text-sm font-medium text-gray-700">Crop</label>
+                            <select id="crop-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#8C6A5D] focus:border-[#8C6A5D] sm:text-sm rounded-md"></select>
+                        </div>
+                        <div class="lg:col-span-2">
+                             <label for="year-slider" class="block text-sm font-medium text-gray-700">Year Range: <span id="year-range-label" class="font-bold"></span></label>
+                            <input id="year-slider" type="range" class="mt-1 w-full" />
+                        </div>
+                    </div>
+
+                    <div class="grid lg:grid-cols-2 gap-8">
+                        <div class="bg-gray-50 p-4 rounded-lg border">
+                             <h3 class="text-xl font-semibold text-center mb-2 text-[#8C6A5D]">Yield Trend Over Time</h3>
+                             <p class="text-sm text-center text-gray-500 mb-4">Shows the selected crop's yield (hg/ha) over the selected time period.</p>
+                            <div class="chart-container"><canvas id="yieldTrendChart"></canvas></div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg border">
+                             <h3 class="text-xl font-semibold text-center mb-2 text-[#8C6A5D]">Yield vs. Environmental Factors</h3>
+                             <p class="text-sm text-center text-gray-500 mb-4">Explore how different factors correlate with yield. Select a factor to view.</p>
+                             <div class="text-center mb-4">
+                                <select id="factor-select" class="w-auto mx-auto mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#8C6A5D] focus:border-[#8C6A5D] sm:text-sm rounded-md">
+                                    <option value="avg_temp">Temperature</option>
+                                    <option value="average_rain_fall_mm_per_year">Rainfall</option>
+                                    <option value="pesticides_tonnes">Pesticides</option>
+                                </select>
+                            </div>
+                            <div class="chart-container"><canvas id="factorScatterChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="predictor" class="section">
+                 <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg border border-gray-200">
+                    <h2 class="text-3xl font-bold text-[#5a4740] mb-4">Yield Predictor</h2>
+                    <p class="text-lg text-gray-600 mb-6">Interact with a simplified version of the prediction model. Enter the values for different factors below and click "Predict Yield" to get an estimated crop yield. This demonstrates how the model uses input data to make a forecast. The actual model is a more complex Random Forest.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="pred-country" class="block text-sm font-medium text-gray-700">Country</label>
+                                <select id="pred-country" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#8C6A5D] focus:border-[#8C6A5D] sm:text-sm rounded-md"></select>
+                            </div>
+                             <div>
+                                <label for="pred-crop" class="block text-sm font-medium text-gray-700">Crop</label>
+                                <select id="pred-crop" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#8C6A5D] focus:border-[#8C6A5D] sm:text-sm rounded-md"></select>
+                            </div>
+                             <div>
+                                <label for="pred-year" class="block text-sm font-medium text-gray-700">Year</label>
+                                <input type="number" id="pred-year" value="2013" class="mt-1 block w-full pl-3 pr-4 py-2 border-gray-300 rounded-md shadow-sm focus:ring-[#8C6A5D] focus:border-[#8C6A5D]">
+                            </div>
+                            <div>
+                                <label for="pred-pesticides" class="block text-sm font-medium text-gray-700">Pesticides (tonnes)</label>
+                                <input type="number" id="pred-pesticides" value="3024.11" class="mt-1 block w-full pl-3 pr-4 py-2 border-gray-300 rounded-md shadow-sm focus:ring-[#8C6A5D] focus:border-[#8C6A5D]">
+                            </div>
+                             <div>
+                                <label for="pred-rain" class="block text-sm font-medium text-gray-700">Average Rainfall (mm/year)</label>
+                                <input type="number" id="pred-rain" value="59.0" class="mt-1 block w-full pl-3 pr-4 py-2 border-gray-300 rounded-md shadow-sm focus:ring-[#8C6A5D] focus:border-[#8C6A5D]">
+                            </div>
+                            <div>
+                                <label for="pred-temp" class="block text-sm font-medium text-gray-700">Average Temperature (°C)</label>
+                                <input type="number" id="pred-temp" value="26.55" class="mt-1 block w-full pl-3 pr-4 py-2 border-gray-300 rounded-md shadow-sm focus:ring-[#8C6A5D] focus:border-[#8C6A5D]">
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center justify-center bg-[#F8F5F1] rounded-lg p-6">
+                            <button id="predict-btn" class="w-full bg-[#8C6A5D] text-white font-bold py-3 px-6 rounded-lg hover:bg-[#5a4740] transition duration-300 text-lg shadow-md">Predict Yield</button>
+                            <div id="prediction-result" class="mt-6 text-center">
+                                <p class="text-gray-600">Your predicted yield will appear here.</p>
+                            </div>
+                            <div id="gemini-feature" class="hidden w-full mt-4 text-center">
+                                <hr class="my-4 border-gray-300">
+                                <button id="gemini-btn" class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold py-3 px-6 rounded-lg hover:opacity-90 transition duration-300 text-lg shadow-md">✨ Get Farming Tips</button>
+                                <div id="gemini-loading" class="hidden">
+                                    <div class="loader"></div>
+                                    <p class="text-sm text-gray-500">Generating expert advice...</p>
+                                </div>
+                                <div id="gemini-result" class="mt-4 text-left p-4 bg-white rounded-md border text-sm"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const yieldData = [
+            {"Area": "India", "Item": "Maize", "Year": 1990, "hg/ha_yield": 13543, "average_rain_fall_mm_per_year": 1083.0, "pesticides_tonnes": 66000.0, "avg_temp": 26.11},
+            {"Area": "India", "Item": "Maize", "Year": 2000, "hg/ha_yield": 18939, "average_rain_fall_mm_per_year": 1083.0, "pesticides_tonnes": 89000.0, "avg_temp": 26.68},
+            {"Area": "India", "Item": "Maize", "Year": 2010, "hg/ha_yield": 25413, "average_rain_fall_mm_per_year": 1083.0, "pesticides_tonnes": 105000.0, "avg_temp": 27.12},
+            {"Area": "India", "Item": "Wheat", "Year": 1990, "hg/ha_yield": 22410, "average_rain_fall_mm_per_year": 1083.0, "pesticides_tonnes": 66000.0, "avg_temp": 26.11},
+            {"Area": "India", "Item": "Wheat", "Year": 2000, "hg/ha_yield": 27790, "average_rain_fall_mm_per_year": 1083.0, "pesticides_tonnes": 89000.0, "avg_temp": 26.68},
+            {"Area": "India", "Item": "Wheat", "Year": 2013, "hg/ha_yield": 31170, "average_rain_fall_mm_per_year": 1083.0, "pesticides_tonnes": 110000.0, "avg_temp": 27.45},
+            {"Area": "United States of America", "Item": "Maize", "Year": 1990, "hg/ha_yield": 74341, "average_rain_fall_mm_per_year": 715.0, "pesticides_tonnes": 400000.0, "avg_temp": 8.63},
+            {"Area": "United States of America", "Item": "Maize", "Year": 2000, "hg/ha_yield": 86326, "average_rain_fall_mm_per_year": 715.0, "pesticides_tonnes": 420000.0, "avg_temp": 9.25},
+            {"Area": "United States of America", "Item": "Maize", "Year": 2010, "hg/ha_yield": 95932, "average_rain_fall_mm_per_year": 715.0, "pesticides_tonnes": 415000.0, "avg_temp": 9.54},
+            {"Area": "United States of America", "Item": "Wheat", "Year": 1990, "hg/ha_yield": 26511, "average_rain_fall_mm_per_year": 715.0, "pesticides_tonnes": 400000.0, "avg_temp": 8.63},
+            {"Area": "United States of America", "Item": "Wheat", "Year": 2000, "hg/ha_yield": 28540, "average_rain_fall_mm_per_year": 715.0, "pesticides_tonnes": 420000.0, "avg_temp": 9.25},
+            {"Area": "United States of America", "Item": "Wheat", "Year": 2013, "hg/ha_yield": 28833, "average_rain_fall_mm_per_year": 715.0, "pesticides_tonnes": 410000.0, "avg_temp": 10.1},
+            {"Area": "Brazil", "Item": "Soybeans", "Year": 1990, "hg/ha_yield": 18450, "average_rain_fall_mm_per_year": 1761.0, "pesticides_tonnes": 70000.0, "avg_temp": 24.5},
+            {"Area": "Brazil", "Item": "Soybeans", "Year": 2000, "hg/ha_yield": 24451, "average_rain_fall_mm_per_year": 1761.0, "pesticides_tonnes": 150000.0, "avg_temp": 24.9},
+            {"Area": "Brazil", "Item": "Soybeans", "Year": 2013, "hg/ha_yield": 28723, "average_rain_fall_mm_per_year": 1761.0, "pesticides_tonnes": 495000.0, "avg_temp": 25.4},
+            {"Area": "Germany", "Item": "Potatoes", "Year": 1991, "hg/ha_yield": 289430, "average_rain_fall_mm_per_year": 700.0, "pesticides_tonnes": 29000.0, "avg_temp": 8.4},
+            {"Area": "Germany", "Item": "Potatoes", "Year": 2002, "hg/ha_yield": 439222, "average_rain_fall_mm_per_year": 700.0, "pesticides_tonnes": 32000.0, "avg_temp": 10.0},
+            {"Area": "Germany", "Item": "Potatoes", "Year": 2013, "hg/ha_yield": 443429, "average_rain_fall_mm_per_year": 700.0, "pesticides_tonnes": 30000.0, "avg_temp": 9.2}
+        ];
+
+        const countries = [...new Set(yieldData.map(d => d.Area))];
+        const crops = [...new Set(yieldData.map(d => d.Item))];
+        const years = [...new Set(yieldData.map(d => d.Year))].sort();
+
+        const countrySelect = document.getElementById('country-select');
+        const cropSelect = document.getElementById('crop-select');
+        const yearSlider = document.getElementById('year-slider');
+        const yearRangeLabel = document.getElementById('year-range-label');
+        const factorSelect = document.getElementById('factor-select');
+
+        const predCountrySelect = document.getElementById('pred-country');
+        const predCropSelect = document.getElementById('pred-crop');
+        const predictBtn = document.getElementById('predict-btn');
+        const predictionResult = document.getElementById('prediction-result');
+        
+        const geminiFeature = document.getElementById('gemini-feature');
+        const geminiBtn = document.getElementById('gemini-btn');
+        const geminiLoading = document.getElementById('gemini-loading');
+        const geminiResult = document.getElementById('gemini-result');
+
+        let minYear = Math.min(...years);
+        let maxYear = Math.max(...years);
+        let lastPrediction = {};
+
+        function populateSelect(selectElement, items, defaultOption) {
+            selectElement.innerHTML = '';
+            const allOption = document.createElement('option');
+            allOption.value = 'All';
+            allOption.textContent = defaultOption;
+            selectElement.appendChild(allOption);
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                option.textContent = item;
+                selectElement.appendChild(option);
+            });
+        }
+        
+        function populatePredictSelects() {
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country;
+                option.textContent = country;
+                predCountrySelect.appendChild(option);
+            });
+            crops.forEach(crop => {
+                const option = document.createElement('option');
+                option.value = crop;
+                option.textContent = crop;
+                predCropSelect.appendChild(option);
+            });
+            predCountrySelect.value = "India";
+            predCropSelect.value = "Maize";
+        }
+
+        populateSelect(countrySelect, countries, 'All Countries');
+        populateSelect(cropSelect, crops, 'All Crops');
+        
+        yearSlider.min = minYear;
+        yearSlider.max = maxYear;
+        yearSlider.value = maxYear;
+        yearRangeLabel.textContent = `${minYear} - ${maxYear}`;
+        
+        let charts = {};
+
+        function createCharts() {
+            const yieldCtx = document.getElementById('yieldTrendChart').getContext('2d');
+            const factorCtx = document.getElementById('factorScatterChart').getContext('2d');
+
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            
+            charts.yieldTrend = new Chart(yieldCtx, {
+                type: 'line',
+                data: { labels: [], datasets: [] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { title: { display: true, text: 'Yield (hg/ha)' } },
+                        x: { title: { display: true, text: 'Year' } }
+                    },
+                    plugins: { legend: { display: true } }
+                }
+            });
+
+            charts.factorScatter = new Chart(factorCtx, {
+                type: 'scatter',
+                data: { datasets: [] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { title: { display: true, text: 'Yield (hg/ha)' } },
+                        x: { title: { display: true, text: 'Factor' } }
+                    },
+                     plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function updateCharts() {
+            const selectedCountry = countrySelect.value;
+            const selectedCrop = cropSelect.value;
+            const selectedMaxYear = parseInt(yearSlider.value, 10);
+            const selectedFactor = factorSelect.value;
+            
+            yearRangeLabel.textContent = `${minYear} - ${selectedMaxYear}`;
+
+            let filteredData = yieldData.filter(d => 
+                (selectedCountry === 'All' || d.Area === selectedCountry) &&
+                (selectedCrop === 'All' || d.Item === selectedCrop) &&
+                d.Year <= selectedMaxYear
+            );
+
+            updateYieldTrendChart(filteredData, selectedCountry, selectedCrop);
+            updateFactorScatterChart(filteredData, selectedFactor);
+        }
+        
+        const chartColors = ['#8C6A5D', '#BFAE99', '#5a4740', '#A99985', '#D4B7A8'];
+
+        function updateYieldTrendChart(data, country, crop) {
+            let datasets = [];
+            const labels = [...new Set(data.map(d => d.Year))].sort();
+
+            if (country !== 'All' && crop !== 'All') {
+                const points = data.filter(d => d.Area === country && d.Item === crop).sort((a,b) => a.Year - b.Year);
+                datasets.push({
+                    label: `${country} - ${crop} Yield`,
+                    data: points.map(d => ({x: d.Year, y: d['hg/ha_yield']})),
+                    borderColor: chartColors[0],
+                    backgroundColor: chartColors[0] + '33',
+                    fill: false,
+                    tension: 0.1
+                });
+            } else if (country !== 'All') {
+                const items = [...new Set(data.filter(d => d.Area === country).map(d => d.Item))];
+                items.forEach((item, i) => {
+                     const points = data.filter(d => d.Area === country && d.Item === item).sort((a,b) => a.Year - b.Year);
+                     datasets.push({
+                         label: item,
+                         data: points.map(d => ({x: d.Year, y: d['hg/ha_yield']})),
+                         borderColor: chartColors[i % chartColors.length],
+                         fill: false,
+                         tension: 0.1
+                     });
+                });
+            } else if (crop !== 'All') {
+                 const areas = [...new Set(data.filter(d => d.Item === crop).map(d => d.Area))];
+                 areas.forEach((area, i) => {
+                     const points = data.filter(d => d.Area === area && d.Item === crop).sort((a,b) => a.Year - b.Year);
+                     datasets.push({
+                         label: area,
+                         data: points.map(d => ({x: d.Year, y: d['hg/ha_yield']})),
+                         borderColor: chartColors[i % chartColors.length],
+                         fill: false,
+                         tension: 0.1
+                     });
+                });
+            } else {
+                 const topCrops = ['Maize', 'Wheat', 'Soybeans', 'Potatoes'];
+                 topCrops.forEach((item, i) => {
+                     const points = data.filter(d => d.Item === item).reduce((acc, curr) => {
+                         const yearData = acc.find(y => y.Year === curr.Year);
+                         if (yearData) {
+                             yearData.sum += curr['hg/ha_yield'];
+                             yearData.count++;
+                         } else {
+                             acc.push({Year: curr.Year, sum: curr['hg/ha_yield'], count: 1});
+                         }
+                         return acc;
+                     }, []).map(d => ({x: d.Year, y: d.sum/d.count})).sort((a,b) => a.x - b.x);
+
+                     datasets.push({
+                         label: `${item} (Avg)`,
+                         data: points,
+                         borderColor: chartColors[i % chartColors.length],
+                         fill: false,
+                         tension: 0.1
+                     });
+                 });
+            }
+
+            charts.yieldTrend.data.labels = labels;
+            charts.yieldTrend.data.datasets = datasets;
+            charts.yieldTrend.update();
+        }
+
+        function updateFactorScatterChart(data, factor) {
+            const factorLabels = {
+                avg_temp: 'Average Temperature (°C)',
+                average_rain_fall_mm_per_year: 'Average Rainfall (mm)',
+                pesticides_tonnes: 'Pesticides (tonnes)'
+            };
+
+            const points = data.map(d => ({
+                x: d[factor],
+                y: d['hg/ha_yield']
+            }));
+            
+            charts.factorScatter.data.datasets = [{
+                label: 'Yield vs Factor',
+                data: points,
+                backgroundColor: chartColors[0] + '80'
+            }];
+            charts.factorScatter.options.scales.x.title.text = factorLabels[factor];
+            charts.factorScatter.update();
+        }
+
+        function simplePredictor() {
+            const pesticides = parseFloat(document.getElementById('pred-pesticides').value);
+            const temp = parseFloat(document.getElementById('pred-temp').value);
+            const rain = parseFloat(document.getElementById('pred-rain').value);
+            const country = document.getElementById('pred-country').value;
+            const crop = document.getElementById('pred-crop').value;
+            
+            if (isNaN(pesticides) || isNaN(temp) || isNaN(rain)) {
+                 predictionResult.innerHTML = `<p class="text-red-500 font-bold">Please enter valid numbers.</p>`;
+                 geminiFeature.classList.add('hidden');
+                 return;
+            }
+
+            let baseYield = 15000; 
+            let tempEffect = (temp - 20) * 500;
+            let rainEffect = -(Math.abs(1000 - rain)) * 10;
+            let pesticideEffect = Math.log10(pesticides + 1) * 2000;
+            
+            let predictedYield = baseYield + tempEffect + rainEffect + pesticideEffect;
+            predictedYield = Math.max(5000, predictedYield);
+            
+            lastPrediction = {
+                country,
+                crop,
+                pesticides,
+                temp,
+                rain,
+                yield: predictedYield.toFixed(0)
+            };
+            
+            predictionResult.innerHTML = `
+                <p class="text-gray-600 font-medium">Predicted Yield:</p>
+                <p class="text-4xl font-bold text-[#5a4740] mt-2">${lastPrediction.yield}</p>
+                <p class="text-gray-500">hg/ha</p>
+            `;
+            
+            geminiFeature.classList.remove('hidden');
+            geminiResult.classList.add('hidden');
+        }
+        
+        async function getFarmingTips() {
+            geminiLoading.classList.remove('hidden');
+            geminiResult.classList.add('hidden');
+            geminiResult.innerHTML = '';
+            
+            const { country, crop, temp, rain, pesticides, yield: predictedYield } = lastPrediction;
+            
+            const systemPrompt = "You are an expert agricultural consultant. Provide concise, actionable farming tips based on the user's data. Focus on improving yield and sustainability. Structure your response with clear headings (using bold markdown) and bullet points. Ground your advice in real-world, verifiable agricultural practices.";
+            const userQuery = `Based on the following data for growing ${crop} in ${country}, with a predicted yield of ${predictedYield} hg/ha:\n- Average Temperature: ${temp}°C\n- Average Rainfall: ${rain} mm/year\n- Pesticides Used: ${pesticides} tonnes\n\nPlease provide 3-4 key farming tips to optimize the yield for the next season. Include advice on soil management, irrigation, and pest control.`;
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                tools: [{ "google_search": {} }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+            };
+
+            try {
+                 const response = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    let text = candidate.content.parts[0].text;
+                    text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#5a4740]">$1</strong>')
+                               .replace(/\*/g, '<br>• ');
+                    
+                    let sourcesHtml = '';
+                    const groundingMetadata = candidate.groundingMetadata;
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                         const sources = groundingMetadata.groundingAttributions
+                            .map(attribution => ({
+                                uri: attribution.web?.uri,
+                                title: attribution.web?.title,
+                            }))
+                            .filter(source => source.uri && source.title);
+                        
+                        if (sources.length > 0) {
+                            sourcesHtml = '<hr class="my-3"><p class="text-xs text-gray-500"><strong>Sources:</strong><ul>';
+                            sources.forEach(source => {
+                                sourcesHtml += `<li class="truncate"><a href="${source.uri}" target="_blank" class="text-blue-600 hover:underline">${source.title}</a></li>`;
+                            });
+                            sourcesHtml += '</ul></p>';
+                        }
+                    }
+                    
+                    geminiResult.innerHTML = text + sourcesHtml;
+                } else {
+                     geminiResult.innerHTML = '<p class="text-red-500">Sorry, I could not generate tips at this time. The response was empty.</p>';
+                }
+            } catch (error) {
+                console.error("Gemini API call failed:", error);
+                geminiResult.innerHTML = `<p class="text-red-500">An error occurred while fetching advice. Please try again later.</p>`;
+            } finally {
+                geminiLoading.classList.add('hidden');
+                geminiResult.classList.remove('hidden');
+            }
+        }
+
+        async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.ok || i === retries - 1) {
+                        return response;
+                    }
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                }
+                await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
+            }
+        }
+
+        countrySelect.addEventListener('change', updateCharts);
+        cropSelect.addEventListener('change', updateCharts);
+        yearSlider.addEventListener('input', updateCharts);
+        factorSelect.addEventListener('change', updateCharts);
+        predictBtn.addEventListener('click', simplePredictor);
+        geminiBtn.addEventListener('click', getFarmingTips);
+        
+        const navButtons = document.querySelectorAll('.nav-button');
+        const sections = document.querySelectorAll('.section');
+
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const target = button.dataset.target;
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                sections.forEach(section => section.classList.toggle('active', section.id === target));
+            });
+        });
+
+        createCharts();
+        updateCharts();
+        populatePredictSelects();
+        simplePredictor();
+    });
+    </script>
+</body>
+</html>
